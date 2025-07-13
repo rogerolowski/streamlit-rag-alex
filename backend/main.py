@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 import requests
 import os
@@ -75,6 +75,29 @@ async def chat(request: ChatRequest):
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
     return {"response": "Please ask about a LEGO set price (e.g., 'What's the price of 75192-1?')"}
+
+# Frontend chat endpoint (matches frontend expectation)
+@app.post("/chat")
+async def chat_endpoint(request: Request):
+    try:
+        data = await request.json()
+        user_input = data.get("query", "")
+        
+        # Use the same logic as the API chat endpoint
+        query = user_input.lower()
+        if "price" in query or "cost" in query:
+            # Extract set number (simplified parsing)
+            set_num = query.split()[-1] if any(c.isdigit() for c in query) else "75192-1"
+            try:
+                set_data = fetch_set_data(set_num)
+                context = f"Set: {set_data['name']}, Pieces: {set_data['num_parts']}, Year: {set_data['year']}"
+                llm_response = get_llm_response(context, query)
+                return {"response": llm_response["response"], "context": context}
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=str(e))
+        return {"response": "Please ask about a LEGO set price (e.g., 'What's the price of 75192-1?')"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid request: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn
