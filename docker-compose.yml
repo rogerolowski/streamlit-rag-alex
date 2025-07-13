@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"
+    networks:
+      - app-network
+    environment:
+      - REBRICKABLE_API_KEY=${REBRICKABLE_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - REBRICKABLE_BASE_URL=${REBRICKABLE_BASE_URL:-https://rebrickable.com/api/v3/lego/}
+      - PORT=8000
+    env_file:
+      - .env
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "8501:8501"
+    environment:
+      - BACKEND_URL=http://backend:8000
+      - FLASK_APP=app.py
+      - FLASK_ENV=development
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
