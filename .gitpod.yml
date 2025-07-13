@@ -1,24 +1,16 @@
 tasks:
-  - name: Start RAG Lego Price Application
-    command: |
-      echo "🚀 Starting RAG Lego Price Application..."
-      echo "📦 Building and starting services with Docker Compose..."
-      docker-compose up --build
-    openMode: split-right
-
-  - name: init
-    init: |
-      docker-compose up --build
-    command: |
-      echo "Application running. Access frontend at http://localhost:8501 and backend at http://localhost:8000"
+  - init: |
+      docker rm -f streamlit-rag-alex-frontend-1 streamlit-rag-alex-backend-1 || true
+      docker network prune -f || true
+  - command: docker-compose up --build
 
 ports:
   - port: 8501
     onOpen: open-preview
-    description: Streamlit Frontend Application
+    description: Streamlit Frontend
   - port: 8000
     onOpen: open-preview
-    description: FastAPI Backend API
+    description: FastAPI Backend
 
 vscode:
   extensions:
@@ -28,4 +20,4 @@ vscode:
     - ms-vscode.vscode-json
     - ms-vscode.vscode-yaml
     - esbenp.prettier-vscode
-    - ms-azuretools.vscode-docker 
+    - ms-azuretools.vscode-docker

@@ -1,5 +1,3 @@
-# version: '3'
-
 services:
   backend:
     build: ./backend
@@ -18,8 +16,6 @@ services:
     environment:
       - REBRICKABLE_API_KEY=${REBRICKABLE_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - BACKEND_URL=http://backend:8000
-      - FLASK_APP=app.py
-      - FLASK_ENV=development
+      - BACKEND_URL=http://localhost:8000
     depends_on:
       - backend
