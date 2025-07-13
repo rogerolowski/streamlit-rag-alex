@@ -2,12 +2,9 @@
 
 services:
   backend:
-    build:
-      context: ./backend
+    build: ./backend
     ports:
       - "8000:8000"
-    networks:
-      - app-network
     environment:
       - REBRICKABLE_API_KEY=${REBRICKABLE_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
@@ -15,8 +12,7 @@ services:
       - PORT=8000
 
   frontend:
-    build:
-      context: ./frontend
+    build: ./frontend
     ports:
       - "8501:8501"
     environment:
@@ -27,9 +23,3 @@ services:
       - FLASK_ENV=development
     depends_on:
       - backend
-    networks:
-      - app-network
-
-networks:
-  app-network:
-    driver: bridge

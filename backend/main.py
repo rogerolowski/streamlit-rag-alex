@@ -43,6 +43,11 @@ def fetch_set_data(set_num):
         raise HTTPException(status_code=404, detail="Set not found")
     return response.json()
 
+# Root endpoint
+@app.get("/")
+async def read_root():
+    return {"status": "OK", "message": "FastAPI backend is running"}
+
 # Health check endpoint
 @app.get("/health")
 async def health_check():
