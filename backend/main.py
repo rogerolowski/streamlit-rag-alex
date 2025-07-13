@@ -42,7 +42,7 @@ REBRICKABLE_BASE_URL = os.environ.get("REBRICKABLE_BASE_URL", "https://rebrickab
 
 # Initialize OpenAI client
 if OPENAI_API_KEY:
-    openai.api_key = OPENAI_API_KEY
+    client = openai.OpenAI(api_key=OPENAI_API_KEY)
 
 def get_llm_response(context, query, set_data=None):
     """Get intelligent price estimation from LLM"""
@@ -83,8 +83,8 @@ Provide a helpful response with:
 
 Keep the response conversational and helpful."""
 
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+        response = client.chat.completions.create(
+            model="gpt-4.1",
             messages=[
                 {"role": "system", "content": "You are a helpful LEGO price estimation assistant."},
                 {"role": "user", "content": prompt}
