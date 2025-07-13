@@ -76,11 +76,9 @@ Click the button above to launch the application in Gitpod. The application will
    ```
 
 2. **Configure API keys** (see Configuration section below)
-   ```bash
-   # Create .env file with your API keys
-   OPENAI_API_KEY=your_openai_api_key_here
-   REBRICKABLE_API_KEY=your_rebrickable_api_key_here
-   ```
+   
+   For Gitpod: Set environment variables in workspace settings
+   For local: Use system environment variables or .env file
 
 3. **Start the application**
    ```bash
@@ -131,7 +129,27 @@ REBRICKABLE_API_KEY=your_rebrickable_api_key_here
 
 ### Setup Instructions
 
-#### Option 1: Environment Variables (Recommended)
+#### Option 1: Gitpod Environment Variables (Recommended)
+
+The application is configured to use Gitpod environment variables automatically. Set your API keys in Gitpod:
+
+1. Go to your Gitpod workspace settings
+2. Add the following environment variables:
+   - `OPENAI_API_KEY`: Your OpenAI API key
+   - `REBRICKABLE_API_KEY`: Your Rebrickable API key
+
+The docker-compose.yml will automatically forward these variables to both containers.
+
+#### Option 2: Local Environment Variables
+
+Set the environment variables in your system:
+
+```bash
+export OPENAI_API_KEY="your_openai_api_key_here"
+export REBRICKABLE_API_KEY="your_rebrickable_api_key_here"
+```
+
+#### Option 3: .env File (Alternative)
 
 Create a `.env` file in the project root:
 
@@ -139,27 +157,6 @@ Create a `.env` file in the project root:
 # .env file
 OPENAI_API_KEY=your_openai_api_key_here
 REBRICKABLE_API_KEY=your_rebrickable_api_key_here
-```
-
-#### Option 2: Docker Compose Environment
-
-Add your API keys to the `docker-compose.yml` file:
-
-```yaml
-services:
-  backend:
-    environment:
-      - OPENAI_API_KEY=your_openai_api_key_here
-      - REBRICKABLE_API_KEY=your_rebrickable_api_key_here
-```
-
-#### Option 3: System Environment Variables
-
-Set the environment variables in your system:
-
-```bash
-export OPENAI_API_KEY="your_openai_api_key_here"
-export REBRICKABLE_API_KEY="your_rebrickable_api_key_here"
 ```
 
 ### Model Priority
