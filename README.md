@@ -219,11 +219,18 @@ git push -u origin main
 
 ### Backend API (FastAPI)
 
+#### Chat & Core Endpoints
+- `GET /` - Root endpoint with API status
 - `GET /health` - Health check endpoint with API status
 - `POST /api/chat` - Chat endpoint for LEGO price queries
-- `GET /api/sets/search` - Search for LEGO sets
-- `GET /api/sets/{set_number}` - Get specific LEGO set information
-- `GET /api/sets` - Get all available LEGO sets
+- `POST /chat` - Frontend chat endpoint
+
+#### Rebrickable API Integration
+- `GET /api/sets/{set_num}` - Get specific LEGO set information
+- `GET /api/sets/search?query={name}` - Search for LEGO sets by name
+- `GET /api/sets/{set_num}/parts` - Get parts list for a specific set
+- `GET /api/themes` - Get all LEGO themes
+- `GET /api/themes/{theme_id}/sets` - Get sets by theme ID
 
 ### Frontend (Streamlit)
 
@@ -242,6 +249,31 @@ Try asking questions like:
 - "Tell me about the Titanic set price"
 - "What's the current price of the Porsche 911?"
 - "Show me Star Wars set prices"
+
+## 🔍 Using the Rebrickable API
+
+### Direct API Calls
+You can also use the API directly for more detailed information:
+
+```bash
+# Get specific set information
+curl "http://localhost:8000/api/sets/75192-1"
+
+# Search for sets by name
+curl "http://localhost:8000/api/sets/search?query=Millennium%20Falcon"
+
+# Get parts list for a set
+curl "http://localhost:8000/api/sets/75192-1/parts"
+
+# Get all themes
+curl "http://localhost:8000/api/themes"
+
+# Get sets by theme (e.g., Star Wars theme_id=171)
+curl "http://localhost:8000/api/themes/171/sets"
+```
+
+### API Documentation
+Visit `http://localhost:8000/docs` for interactive API documentation when the backend is running.
 
 ## 🧠 RAG Implementation
 

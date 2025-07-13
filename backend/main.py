@@ -4,7 +4,7 @@ import requests
 import os
 import re
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 import openai
 
 app = FastAPI()
@@ -18,9 +18,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Pydantic model for chat input
+# Pydantic models
 class ChatRequest(BaseModel):
     query: str
+
+class SetSearchRequest(BaseModel):
+    query: str
+    page_size: Optional[int] = 10
+
+class SetInfo(BaseModel):
+    set_num: str
+    name: str
+    year: int
+    num_parts: int
+    theme_id: Optional[int]
+    theme_name: Optional[str]
+    image_url: Optional[str]
 
 # Environment variables
 REBRICKABLE_API_KEY = os.environ.get("REBRICKABLE_API_KEY", "")
@@ -134,14 +147,63 @@ def fetch_set_data(set_num):
     except requests.exceptions.RequestException as e:
         raise HTTPException(status_code=500, detail=f"API request failed: {str(e)}")
 
-def search_sets_by_name(name):
-    """Search for sets by name"""
+def search_sets_by_name(name, page_size=10):
+    """Search for sets by name with enhanced functionality"""
     if not REBRICKABLE_API_KEY:
         return []
     
     url = f"{REBRICKABLE_BASE_URL}sets/"
     headers = {"Authorization": f"key {REBRICKABLE_API_KEY}"}
-    params = {"search": name, "page_size": 5}
+    params = {"search": name, "page_size": page_size}
+    
+    try:
+        response = requests.get(url, headers=headers, params=params, timeout=10)
+        if response.status_code == 200:
+            return response.json().get('results', [])
+    except:
+        pass
+    return []
+
+def get_set_parts(set_num):
+    """Get parts list for a specific set"""
+    if not REBRICKABLE_API_KEY:
+        return []
+    
+    url = f"{REBRICKABLE_BASE_URL}sets/{set_num}/parts/"
+    headers = {"Authorization": f"key {REBRICKABLE_API_KEY}"}
+    
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        if response.status_code == 200:
+            return response.json().get('results', [])
+    except:
+        pass
+    return []
+
+def get_themes():
+    """Get list of LEGO themes"""
+    if not REBRICKABLE_API_KEY:
+        return []
+    
+    url = f"{REBRICKABLE_BASE_URL}themes/"
+    headers = {"Authorization": f"key {REBRICKABLE_API_KEY}"}
+    
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        if response.status_code == 200:
+            return response.json().get('results', [])
+    except:
+        pass
+    return []
+
+def get_sets_by_theme(theme_id, page_size=10):
+    """Get sets by theme ID"""
+    if not REBRICKABLE_API_KEY:
+        return []
+    
+    url = f"{REBRICKABLE_BASE_URL}sets/"
+    headers = {"Authorization": f"key {REBRICKABLE_API_KEY}"}
+    params = {"theme_id": theme_id, "page_size": page_size}
     
     try:
         response = requests.get(url, headers=headers, params=params, timeout=10)
@@ -166,6 +228,64 @@ async def health_check():
             "rebrickable": "configured" if REBRICKABLE_API_KEY else "not_configured",
             "openai": "configured" if OPENAI_API_KEY else "not_configured"
         }
+    }
+
+# API Endpoints for Rebrickable Integration
+
+@app.get("/api/sets/{set_num}")
+async def get_set(set_num: str):
+    """Get specific LEGO set information"""
+    try:
+        set_data = fetch_set_data(set_num)
+        return {
+            "set_num": set_data['set_num'],
+            "name": set_data['name'],
+            "year": set_data['year'],
+            "num_parts": set_data['num_parts'],
+            "theme_id": set_data.get('theme_id'),
+            "image_url": set_data.get('set_img_url'),
+            "last_updated": set_data.get('last_modified_dt')
+        }
+    except HTTPException as e:
+        raise e
+
+@app.get("/api/sets/search")
+async def search_sets(query: str, page_size: int = 10):
+    """Search for LEGO sets by name"""
+    sets = search_sets_by_name(query, page_size)
+    return {
+        "query": query,
+        "results": sets,
+        "count": len(sets)
+    }
+
+@app.get("/api/sets/{set_num}/parts")
+async def get_set_parts_endpoint(set_num: str):
+    """Get parts list for a specific set"""
+    parts = get_set_parts(set_num)
+    return {
+        "set_num": set_num,
+        "parts": parts,
+        "count": len(parts)
+    }
+
+@app.get("/api/themes")
+async def get_themes_endpoint():
+    """Get all LEGO themes"""
+    themes = get_themes()
+    return {
+        "themes": themes,
+        "count": len(themes)
+    }
+
+@app.get("/api/themes/{theme_id}/sets")
+async def get_sets_by_theme_endpoint(theme_id: int, page_size: int = 10):
+    """Get sets by theme ID"""
+    sets = get_sets_by_theme(theme_id, page_size)
+    return {
+        "theme_id": theme_id,
+        "sets": sets,
+        "count": len(sets)
     }
 
 @app.post("/api/chat")
